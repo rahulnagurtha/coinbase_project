@@ -1,8 +1,8 @@
 #include "order_book_manager.hpp"
 #include <iostream>
+#include <cstdint>
 
 #define LOW_ACCESS_INDEX 50
-#define DEBUG_MODE_ON 0
 
 OrderBookManager::OrderBookManager(OrderBook &t_order_book)
     : order_book_(t_order_book),
@@ -29,7 +29,6 @@ void OrderBookManager::OnOrderAdd(uint64_t t_order_id_, uint8_t t_side_, double 
     if (!order_book_.initial_book_constructed_)
     {
         order_book_.BuildIndex(t_side_, int_price);
-        order_book_.initial_book_constructed_ = true;
     }
 
     int new_order_level = 0;
@@ -264,8 +263,9 @@ void OrderBookManager::OnOrderDelete(uint64_t t_order_id_, uint8_t t_side_)
 
         for (int t_index = order_book_.base_bid_index_ - 1; t_index >= bid_index; t_index--)
         {
-            if (!order_book_.IsBidLevelEmpty(t_index))
+            if (!order_book_.IsBidLevelEmpty(t_index) || t_index == bid_index) {
                 level_changed++;
+            }
         }
     }
     break;
@@ -302,7 +302,7 @@ void OrderBookManager::OnOrderDelete(uint64_t t_order_id_, uint8_t t_side_)
         cumulative_old_ordercount = order_book_.GetAskOrders(ask_index);
 
         // modify the data at level @ask_index
-        order_book_.UpdateAskLevel(cumulative_old_size - order_size, cumulative_old_ordercount - 1);
+        order_book_.UpdateAskLevel(ask_index, cumulative_old_size - order_size, cumulative_old_ordercount - 1);
 
         // checking if no more orders are left at @ask_index
         is_level_deleted = (order_book_.IsAskLevelEmpty(ask_index));
@@ -323,7 +323,7 @@ void OrderBookManager::OnOrderDelete(uint64_t t_order_id_, uint8_t t_side_)
 
         for (int t_index = order_book_.base_ask_index_ - 1; t_index >= ask_index; t_index--)
         {
-            if (!order_book_.IsAskLevelEmpty(t_index))
+            if (!order_book_.IsAskLevelEmpty(t_index) || t_index == ask_index)
                 level_changed++;
         }
     }
@@ -337,7 +337,7 @@ void OrderBookManager::OnOrderDelete(uint64_t t_order_id_, uint8_t t_side_)
     }
 
 #if DEBUG_MODE_ON
-    std::cout << typeid(*this).name() << ":" << __func__ << "Order Deleted at level :" << level_changed << "...."
+    std::cout << typeid(*this).name() << ":" << __func__ << " Order Deleted at level :" << level_changed << "...."
               << std::endl;
 #endif
 }
@@ -442,7 +442,6 @@ void OrderBookManager::OnOrderModify(uint64_t t_order_id_, uint8_t t_side_, int 
         if (!order_book_.initial_book_constructed_)
         {
             order_book_.BuildIndex(t_side_, int_price);
-            order_book_.initial_book_constructed_ = true;
         }
 
         int ask_index = order_book_.GetAskIndex(int_price);
@@ -550,7 +549,7 @@ void OrderBookManager::OnOrderReplace(uint64_t t_order_id_, uint8_t t_side_, dou
 void OrderBookManager::OnOrderExec(uint64_t t_order_id_, uint8_t t_side_, double t_price_, int t_size_exec_)
 {
 #if DEBUG_MODE_ON
-    std::cout << typeid(*this).name() << ':' << __func__ << " " << t_order_id_;
+    std::cout << typeid(*this).name() << ':' << __func__ << " " << t_order_id_ << std::endl;
 #endif
 
     // not till book is ready

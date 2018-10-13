@@ -1,8 +1,11 @@
 #include <vector>
 #include <deque>
 #include <string>
+#include <cstdint>
+#include <typeinfo>
 
 #define LOW_ACCESS_INDEX 50
+#define DEBUG_MODE_ON 0
 
 struct PriceLevelInfo
 {
@@ -44,13 +47,13 @@ struct OrderBook
 
     void ResetBook();
 
-    std::string OrderBook::ShowMarket();
+    std::string ShowMarket();
 
     bool IsBidLevelEmpty(int bid_index);
     bool IsAskLevelEmpty(int ask_index);
 
-    bool OrderBook::IsAskBookEmpty();
-    bool OrderBook::IsBidBookEmpty();
+    bool IsAskBookEmpty();
+    bool IsBidBookEmpty();
 
     void UpdateBidLevel(int index, int size, int ordercount);
     void UpdateAskLevel(int index, int size, int ordercount);
@@ -73,21 +76,21 @@ struct OrderBook
         return base_ask_index_ + (ask_levels_[base_ask_index_].limit_int_price_ - int_price);
     }
 
-    int GetBidIntPrice(int index) { return bid_levels_[index].limit_int_price_; }
+    int GetBidIntPrice(int index) { return (index >= 0 ? bid_levels_[index].limit_int_price_ : 0); }
 
-    int GetAskIntPrice(int index) { return ask_levels_[index].limit_int_price_; }
+    int GetAskIntPrice(int index) { return (index >= 0 ? ask_levels_[index].limit_int_price_ : 0); }
 
-    int GetBidSize(int index) { return bid_levels_[index].limit_size_; }
+    int GetBidSize(int index) { return (index >= 0 ? bid_levels_[index].limit_size_ : 0); }
 
-    int GetAskSize(int index) { return ask_levels_[index].limit_size_; }
+    int GetAskSize(int index) { return (index >= 0 ? ask_levels_[index].limit_size_ : 0); }
 
-    double GetBidPrice(int index) { return bid_levels_[index].limit_price_; }
+    double GetBidPrice(int index) { return (index >= 0 ? bid_levels_[index].limit_price_ : 0); }
 
-    double GetAskPrice(int index) { return ask_levels_[index].limit_price_; }
+    double GetAskPrice(int index) { return (index >= 0 ? ask_levels_[index].limit_price_ : 0); }
 
-    int GetBidOrders(int index) { return bid_levels_[index].limit_ordercount_; }
+    int GetBidOrders(int index) { return (index >= 0 ? bid_levels_[index].limit_ordercount_ : 0); }
 
-    int GetAskOrders(int index) { return ask_levels_[index].limit_ordercount_; }
+    int GetAskOrders(int index) { return (index >= 0 ? ask_levels_[index].limit_ordercount_ : 0); }
 
     double GetDoublePx(const int t_int_price_) const { return min_price_increment_ * t_int_price_; }
 

@@ -10,7 +10,7 @@
 #include "order_book.hpp"
 
 #define LOW_ACCESS_INDEX 50
-#define MIN_INITIAL_TICK_BASE 1024
+#define MIN_INITIAL_TICK_BASE 512
 
 OrderBook::OrderBook(std::string t_exchange_symbol_, double min_price_increment)
     : exchange_symbol_(t_exchange_symbol_),
@@ -22,11 +22,14 @@ OrderBook::OrderBook(std::string t_exchange_symbol_, double min_price_increment)
       initial_tick_size_(MIN_INITIAL_TICK_BASE),
       max_tick_range_(MIN_INITIAL_TICK_BASE)
 {
+    Initialize();
 }
 
 void OrderBook::Initialize()
 {
-
+#if DEBUG_MODE_ON
+    std::cout << typeid(*this).name() << ":" << __func__ << std::endl;
+#endif
     initial_tick_size_ = MIN_INITIAL_TICK_BASE;
 
     max_tick_range_ = (2 * initial_tick_size_ + 1);
@@ -44,35 +47,53 @@ std::string OrderBook::ShowMarket()
 {
     std::ostringstream t_temp_oss_;
     t_temp_oss_ << exchange_symbol_ << "\n";
-    unsigned int m_m_levels = 5;
-    for (unsigned int t_level_ = 0; t_level_ < m_m_levels; t_level_++)
+    unsigned int num_of_levels = 10;
+    int tmp_base_bid_idx = base_bid_index_;
+    int tmp_base_ask_idx = base_ask_index_;
+    double vwap_bid_price = 0.0;
+    double vwap_ask_price = 0.0;
+    int sum_of_top_bids = 0;
+    int sum_of_top_asks = 0;
+    for (unsigned int t_level_ = 0; t_level_ < num_of_levels; t_level_++)
     {
-        t_temp_oss_.width(5);
-        t_temp_oss_ << bid_size(t_level_);
-        t_temp_oss_ << " ";
-        t_temp_oss_.width(5);
-        t_temp_oss_ << bid_order(t_level_);
-        t_temp_oss_ << " ";
-        t_temp_oss_.width(6);
-        t_temp_oss_ << bid_price(t_level_);
-        t_temp_oss_ << " ";
-        t_temp_oss_.width(6);
-        t_temp_oss_ << bid_int_price(t_level_);
-        t_temp_oss_ << " X ";
-        t_temp_oss_.width(6);
-        t_temp_oss_ << ask_int_price(t_level_);
-        t_temp_oss_ << " ";
-        t_temp_oss_.width(6);
-        t_temp_oss_ << ask_price(t_level_);
-        t_temp_oss_ << " ";
-        t_temp_oss_.width(5);
-        t_temp_oss_ << ask_order(t_level_);
-        t_temp_oss_ << " ";
-        t_temp_oss_.width(6);
-        t_temp_oss_ << ask_size(t_level_);
+        while(tmp_base_bid_idx >= 0 && IsBidLevelEmpty(tmp_base_bid_idx)) {
+            tmp_base_bid_idx--;
+        }
+        while(tmp_base_ask_idx >= 0 && IsAskLevelEmpty(tmp_base_ask_idx)) {
+            tmp_base_ask_idx--;
+        }
 
-        t_temp_oss_ << std::endl;
+        vwap_bid_price += GetBidPrice(tmp_base_bid_idx) * GetBidSize(tmp_base_bid_idx);
+        vwap_ask_price += GetAskPrice(tmp_base_ask_idx) * GetAskSize(tmp_base_ask_idx);
+
+        sum_of_top_bids += GetBidSize(tmp_base_bid_idx);
+        sum_of_top_asks += GetAskSize(tmp_base_ask_idx);
+
+        t_temp_oss_.width(6);
+        t_temp_oss_ << GetBidPrice(tmp_base_bid_idx);
+        t_temp_oss_ << " ";
+        t_temp_oss_.width(5);
+        t_temp_oss_ << GetBidOrders(tmp_base_bid_idx);
+        t_temp_oss_ << " ";
+        t_temp_oss_.width(5);
+        t_temp_oss_ << GetBidSize(tmp_base_bid_idx);
+        t_temp_oss_.width(5);
+        t_temp_oss_ << " X ";
+        t_temp_oss_.width(5);
+        t_temp_oss_ << GetAskSize(tmp_base_ask_idx);
+        t_temp_oss_ << " ";
+        t_temp_oss_.width(5);
+        t_temp_oss_ << GetAskOrders(tmp_base_ask_idx);
+        t_temp_oss_ << " ";
+        t_temp_oss_.width(6);
+        t_temp_oss_ << GetAskPrice(tmp_base_ask_idx);
+
+        t_temp_oss_ << "\n";
+        tmp_base_bid_idx--;
+        tmp_base_ask_idx--;
     }
+    t_temp_oss_ << "VWAP Bid Price : " << (sum_of_top_bids != 0 ? vwap_bid_price / sum_of_top_bids : 0.0) << "\n";
+    t_temp_oss_ << "VWAP Ask Price : " << (sum_of_top_asks != 0 ? vwap_ask_price / sum_of_top_asks : 0.0) << "\n";
     return t_temp_oss_.str();
 }
 
@@ -142,6 +163,10 @@ void OrderBook::ResetAskLevel(int index)
  */
 void OrderBook::RebuildIndexHighAccess(char t_buysell_, int new_int_price_)
 {
+#if DEBUG_MODE_ON
+    std::cout << typeid(*this).name() << ":" << __func__ << " " << " [" << t_buysell_ << "," << new_int_price_
+            << "]" << std::endl;
+#endif
     switch (t_buysell_)
     {
     case 'B':
@@ -230,6 +255,10 @@ void OrderBook::RebuildIndexHighAccess(char t_buysell_, int new_int_price_)
 
 void OrderBook::RebuildIndexLowAccess(char t_buysell_, int new_int_price_)
 {
+#if DEBUG_MODE_ON
+    std::cout << typeid(*this).name() << ":" << __func__ << " " << " [" << t_buysell_ << "," << new_int_price_
+            << "]" << std::endl;
+#endif
     switch (t_buysell_)
     {
     case 'B':
@@ -302,6 +331,10 @@ void OrderBook::RebuildIndexLowAccess(char t_buysell_, int new_int_price_)
 
 void OrderBook::BuildIndex(char t_buysell_, int int_price_)
 {
+#if DEBUG_MODE_ON
+    std::cout << typeid(*this).name() << ":" << __func__ << " " << " [" << t_buysell_ << "," << int_price_
+            << "]" << std::endl;
+#endif
     int int_bid_price_ = (t_buysell_ == 'B') ? int_price_ : int_price_ - 1;
     int int_ask_price_ = int_bid_price_ + 1;
 

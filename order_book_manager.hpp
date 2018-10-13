@@ -32,7 +32,7 @@ class OrderBookManager
     std::unordered_map<uint64_t, OrderInfo> order_id_to_ask_order_info_map_;
 
     // The underlying order book
-    OrderBook order_book_;
+    OrderBook &order_book_;
 
   public:
     OrderBookManager(OrderBook &t_order_book);
@@ -48,4 +48,7 @@ class OrderBookManager
     void OnOrderResetEnd();
     void UpdateBaseBidIndex();
     void UpdateBaseAskIndex();
+    std::string ShowMarket() {
+        return order_book_.ShowMarket();
+    }
 };
