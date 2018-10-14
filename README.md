@@ -1,4 +1,4 @@
-Order_Book:
+**Order_Book:**
 
 The only data structure used in maintaining the status of the order book is STL Vector.
 
@@ -28,33 +28,32 @@ divide the actual price with min_price_increment and this turns out to be an int
 One other issue in maintaining the order book in the form of array is the size of the array which is constant, now if we want to increase the size of the array during runtime, we can do that in O(size_of_book) time. Though this operation is very costly this doesn't happen very often, this can also be avoided by allocating suffienciently large amount of memory in the beginning. Or the other heuristic could be to ignore the incoming orders which would be very deeper in the order book.
 
 
-Order_Book_Manager:
+**Order_Book_Manager:**
 
 This is an interface to manipulate the underlying order book. Also this class maintains the list of live orders on both Bid/Ask Side in STL unoredered_map(hash_map) where the key is the OrderId and the value is the meta-data of the order.
 
 
 Let's look at the time complexity of the different order types.
 
-OrderAdd: This just involves adding it to the live order map which takes O(num_of_live_orders) in worst case, O(1) in best case and thereby modifying the corresponding bid/ask level in the underlying order book, which is O(1) as discussed above. So total time is O(1) in best case and O(num_of_live_orders) in worst case.
+**OrderAdd:** This just involves adding it to the live order map which takes O(num_of_live_orders) in worst case, O(1) in best case and thereby modifying the corresponding bid/ask level in the underlying order book, which is O(1) as discussed above. So total time is O(1) in best case and O(num_of_live_orders) in worst case.
 
-OrderDelete: This just involves deleting the order from live order map which takes O(num_of_live_orders) in worst case, O(1) in best case and thereby modifying the corresponding bid/ask level in the underlying order book, which is O(1) as discussed above. So total time is O(num_of_live_orders) in worst case, O(1) in best case.
-
-
-OrderModify: This just involves modifying the order meta-data in live order map which takes O(num_of_live_orders) in worst case, O(1) in best case and thereby modifying the corresponding bid/ask level in the underlying order book, which is O(1) as discussed above. So total time is O(num_of_live_orders) in worst case, O(1) in best case
+**OrderDelete:** This just involves deleting the order from live order map which takes O(num_of_live_orders) in worst case, O(1) in best case and thereby modifying the corresponding bid/ask level in the underlying order book, which is O(1) as discussed above. So total time is O(num_of_live_orders) in worst case, O(1) in best case.
 
 
-OrderExec: This just involves modifying the order meta-data in live order map which takes O(num_of_live_orders) in worst case, O(1) in best case and thereby modifying the corresponding bid/ask level in the underlying order book, which is O(1) as discussed above. So total time is O(num_of_live_orders) in worst case, O(1) in best case.
+**OrderModify:** This just involves modifying the order meta-data in live order map which takes O(num_of_live_orders) in worst case, O(1) in best case and thereby modifying the corresponding bid/ask level in the underlying order book, which is O(1) as discussed above. So total time is O(num_of_live_orders) in worst case, O(1) in best case
 
 
-ShowTop10Levels: Since we know the index of the best bid/ask level in the array of the underlying order book, we have to traverse further until we see the next 10 levels on each bid/ask side. The time complexity here is the difference between the int_price_level (price divided by min_price_increment) of the best bid/ask level and the int_price_level of 10th bid/ask level. For example, if min_price_increment is 0.5 and the best bid price is 100 and the 10th best bid price is 90 it takes (100/0.5 - 90/0.5) == (20) simple operations. While traversing each of these 10 levels the VWAP bid/ask price can be computed accordingly.
+**OrderExec:** This just involves modifying the order meta-data in live order map which takes O(num_of_live_orders) in worst case, O(1) in best case and thereby modifying the corresponding bid/ask level in the underlying order book, which is O(1) as discussed above. So total time is O(num_of_live_orders) in worst case, O(1) in best case.
+
+
+**ShowTop10Levels:** Since we know the index of the best bid/ask level in the array of the underlying order book, we have to traverse further until we see the next 10 levels on each bid/ask side. The time complexity here is the difference between the int_price_level (price divided by min_price_increment) of the best bid/ask level and the int_price_level of 10th bid/ask level. For example, if min_price_increment is 0.5 and the best bid price is 100 and the 10th best bid price is 90 it takes (100/0.5 - 90/0.5) == (20) simple operations. While traversing each of these 10 levels the VWAP bid/ask price can be computed accordingly.
 
 
 
-Note: Instead of using the unordered_map, we can instead use the map STL and we can say that time complexity of search operation is O(log(N)) in worst case.
+**Note:** Instead of using the unordered_map, we can instead use the map STL and we can say that time complexity of search operation is O(log(N)) in worst case.
  
 
-Extra question in bonus section: 
-	"for each level, print the average/medium/min/max order sizes"
+**Extra question in bonus section, "for each level, print the average/medium/min/max order sizes"**
 
 Max/Min Order Size at each level: This can be easily found by maintaining the prioirity_queue for each of the levels and updating this data structure takes O(log(order_count_at_this_level)) and finding the max/min element in priroity_queue/heap takes O(1).
 
@@ -64,6 +63,7 @@ Average: This can be computed easily as (total_orders_size/total_order_count).
 
 
 
-How to run a sample toy_program:
+**How to run a sample toy_program:**
+
 Compile: g++ -std=c++11 -o order_manager test_program.cpp order_book.cpp order_book_manager.cpp
 Run: ./order_manager
