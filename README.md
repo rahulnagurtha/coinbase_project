@@ -10,7 +10,7 @@ Now apart from maintaining the state of each of the price level in STL unordered
 
 Now when the new order arrives, it has to be added to the map of live orders(Expected O(1) time) and
 the corresponding price level in order book has to be updated with the new size and order count, this
-would take extra expected O(1) time. And hence this leads to Expected time complexity of O(log(live_order_count)) + O(log(num_of_levels_in_order_book)) time.
+would take extra expected O(1) time. And hence this leads to Expected time complexity of O(1) + O(1) time.
 
 But we also need to keep in mind that search in a hash_map can take upto O(N) in worst case and hence in worst case the above algorithm might take O(N) + O(N) time. If we care about being very fast which is the case in HFT kind of setup, we would want to optimize this further. 
 
